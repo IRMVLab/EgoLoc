@@ -263,8 +263,8 @@ But for now, feel free to explore the demos — and try it out on your own video
 ## 5. Our Future Roadmap
 
 * [x] Add support for **3D hand motion analysis** *(within 2 weeks)*
-* [ ] Extend to **long untrimmed videos** *(before IROS 2025)*
-* [ ] Improve efficiency of the **feedback loop mechanism** *(before IROS 2025)*
+* [ ] Extend to **long untrimmed videos** 
+* [ ] Improve efficiency of the **feedback loop mechanism** 
 
 ---
 
@@ -275,3 +275,4 @@ But for now, feel free to explore the demos — and try it out on your own video
 Copyright 2025, IRMV Lab, SJTU.
 
 This project is free software made available under the MIT License. For more details see the LICENSE file.
+
