@@ -8,9 +8,7 @@ EgoLoc/
 └── Video-Depth-Anything/ ← git clone https://github.com/DepthAnything/Video-Depth-Anything.git
 """
 
-# ---------------------------------------------------------------------------
 # Imports
-# ---------------------------------------------------------------------------
 import argparse
 import base64
 import json
@@ -35,9 +33,7 @@ try:
 except ImportError:  # Allow import on machines without torch
     torch = None
 
-# ---------------------------------------------------------------------------
 # External repos that *must* exist inside EgoLoc root
-# ---------------------------------------------------------------------------
 try:
     import hamer  # type: ignore
 except ImportError as e:
@@ -57,9 +53,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 plt.switch_backend("Agg")  # headless plotting
 
-# ---------------------------------------------------------------------------
-# Helper – unpack Video‑Depth‑Anything *_depths.npz → per‑frame .npy
-# ---------------------------------------------------------------------------
+# Helper to unpack Video-Depth-Anything *_depths.npz to per-frame .npy
 def _unpack_depth_npz(depth_dir: Path) -> None:
     """Convert VDA’s *_depths.npz to individual .npy, skipping ones that exist."""
     npz_files = list(depth_dir.glob("*_depths.npz"))
@@ -79,9 +73,7 @@ def _unpack_depth_npz(depth_dir: Path) -> None:
 
 
 
-# ---------------------------------------------------------------------------
 # Paths & repo‑root helpers
-# ---------------------------------------------------------------------------
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = next(
     p
@@ -91,12 +83,10 @@ REPO_ROOT = next(
 
 VDA_DIR = REPO_ROOT / "Video-Depth-Anything"
 
-DEPTH_SCALE_M = 3.0  # pixel value 255 ↔ 3 m (linear scaling)
+DEPTH_SCALE_M = 3.0  # pixel value 255 corresponds to 3m (linear scaling)
 MAX_FEEDBACKS = 1
 
-# ---------------------------------------------------------------------------
 # Depth-quality helpers
-# ---------------------------------------------------------------------------
 def _is_invalid_inv(inv: np.ndarray) -> bool:
     """
     Return True when the inverse-depth tensor is all-NaN/Inf or nearly flat.
@@ -111,21 +101,17 @@ def count_bad_depth_tensors(depth_dir: Path) -> Tuple[int, int]:
     bad, total = 0, 0
     for f in depth_dir.glob("pred_depth_*.npy"):
         total += 1
-        inv = np.load(f, mmap_mode="r")  # cheap, no RAM blow-up
+        inv = np.load(f, mmap_mode="r")  # memory-mapped to avoid loading everything
         if _is_invalid_inv(inv):
             bad += 1
     return bad, total
 
-# ---------------------------------------------------------------------------
 # Basic helpers
-# ---------------------------------------------------------------------------
 def get_json_path(video_name: str, base_dir: str):
     return os.path.join(base_dir, f"{video_name}_speed.json")
 
 
-# --------------------------------------------------------------------------
 #                           IMAGE HELPERS
-# --------------------------------------------------------------------------
 def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
     """Resize *image* while preserving aspect ratio."""
     if width is None and height is None:
@@ -159,9 +145,7 @@ def image_resize_for_vlm(frame, inter=cv2.INTER_AREA):
             new_h = int(new_w / aspect)
     return cv2.resize(frame, (new_w, new_h), interpolation=inter)
 
-# --------------------------------------------------------------------------
 #                     VISION–LANGUAGE MODEL WRAPPER
-# --------------------------------------------------------------------------
 def extract_json_part(text_output: str) -> Optional[str]:
     """Extract the JSON fragment {"points":[...]} from GPT text output."""
     text = text_output.strip().replace(" ", "").replace("\n", "")
@@ -254,9 +238,7 @@ def scene_understanding(credentials: Dict[str, Any], frame: np.ndarray, prompt: 
         return -1, content
 
 
-# --------------------------------------------------------------------------
 #        GRID BUILDERS & FRAME-SELECTION UTILITIES  (verbatim from 2-D)
-# --------------------------------------------------------------------------
 def create_frame_grid_with_keyframe(video_path: str, frame_indices: List[int], grid_size: int) -> np.ndarray:
     """Return a numbered frame grid (BGR uint8)."""
     spacer = 0
@@ -398,9 +380,7 @@ def select_and_filter_keyframes_with_anchor(sel: List[int], total_idx: List[int]
     return sorted(filtered)
 
 
-# --------------------------------------------------------------------------
 #             FEEDBACK + TASK-SELECTION (verbatim logic)
-# --------------------------------------------------------------------------
 def determine_by_state(credentials, video_path, action, grid_size, total_frames, frame_index, anchor, speed_folder):
     """Ask GPT-4o if *frame_index* is valid contact/separation."""
     prompt = (
@@ -596,9 +576,7 @@ def process_task(credentials, video_path, action, grid_size, total_frames, ancho
     return used[idx]
 
 
-# ---------------------------------------------------------------------------
 # Depth video generation via Video‑Depth‑Anything
-# ---------------------------------------------------------------------------
 def generate_depth_video_vda(video_path: str, depth_out_path: str, *, device: str = "cuda", encoder: str = "vits") -> Path:
     """Run Video‑Depth‑Anything once and save the raw depth video."""
     video_path = Path(video_path).resolve()
@@ -634,9 +612,7 @@ def generate_depth_video_vda(video_path: str, depth_out_path: str, *, device: st
 
     return depth_out_path
 
-# ---------------------------------------------------------------------------
 #                     DEPTH-TENSOR REPAIR HELPERS
-# ---------------------------------------------------------------------------
 def _invalid_depth_indices(depth_dir: Path) -> List[int]:
     """Return a list of frame indices whose depth tensors are unusable."""
     bad_idx = []
@@ -655,17 +631,13 @@ def _remove_depth_tensors(depth_dir: Path, indices: List[int]) -> None:
         if f.exists():
             f.unlink()
 
-# ---------------------------------------------------------------------------
 # Debug logging helpers removed
-# ---------------------------------------------------------------------------
 # _log_zero_speed no longer needed – provide empty stub to avoid NameError if
 # residual references remain.
 def _log_zero_speed(*args, **kwargs):
     pass
 
-# -------------------------------------------------------------------------
 # Depth loading helper
-# ---------------------------------------------------------------------------
 def _load_depth(depth_dir: Path, idx: int) -> Optional[np.ndarray]:
     """
     VDA stores **inverse depth** (bigger = nearer).  
@@ -677,12 +649,10 @@ def _load_depth(depth_dir: Path, idx: int) -> Optional[np.ndarray]:
     inv = np.load(f).astype(np.float32)          # (H, W)
     if _is_invalid_inv(inv):                     # ← early-reject unusable tensor
         return None
-    depth = DEPTH_SCALE_M / (inv + 1e-6)         # invert once, not twice
+    depth = DEPTH_SCALE_M / (inv + 1e-6)  # invert once, not twice
     return depth
 
-# ---------------------------------------------------------------------------
 # Simple camera projection helper
-# ---------------------------------------------------------------------------
 def _pixel_to_camera(u: float, v: float, z: float, W: int, H: int):
     fx = fy = max(W, H)
     cx, cy = W / 2.0, H / 2.0
@@ -690,9 +660,7 @@ def _pixel_to_camera(u: float, v: float, z: float, W: int, H: int):
     Y = (v - cy) * z / fy
     return X, Y, z
 
-# ---------------------------------------------------------------------------
 # HaMeR / ViTPose – created once, reused
-# ---------------------------------------------------------------------------
 _HAMER_CACHE: Dict[str, ViTPoseModel] = {}
 
 
@@ -720,9 +688,7 @@ def _get_vitpose_model(device: str = "cuda") -> ViTPoseModel:
     return _HAMER_CACHE["cpm"]
 
 
-# ---------------------------------------------------------------------------
 # Wrist detection helper (depth‑guided + ViTPose)
-# ---------------------------------------------------------------------------
 def _wrist_from_frame(frame_bgr: np.ndarray, gray_depth: np.ndarray, cpm: ViTPoseModel):
     # 1) Depth‑based hand ROI – nearest object in view
     nearest = gray_depth < np.percentile(gray_depth, 10)  # closest 25 %
@@ -730,7 +696,7 @@ def _wrist_from_frame(frame_bgr: np.ndarray, gray_depth: np.ndarray, cpm: ViTPos
     if n_lbl == 0:
         return None
 
-    # largest blob → hand / forearm
+    # largest blob is hand / forearm
     sizes = ndimage.sum(nearest, labels, range(1, n_lbl + 1))
     hand_lbl = 1 + int(np.argmax(sizes))
     mask = labels == hand_lbl
@@ -746,7 +712,7 @@ def _wrist_from_frame(frame_bgr: np.ndarray, gray_depth: np.ndarray, cpm: ViTPos
     )
     pose = cpm.predict_pose(roi_bgr[:, :, ::-1], [bbox])[0]
 
-    hand_kpts = pose["keypoints"][-21:]  # right‑hand keypoints
+    hand_kpts = pose["keypoints"][-21:]  # right-hand keypoints
     valid = hand_kpts[:, 2] > 0.35
     if valid.sum() <= 3:
         return None
@@ -755,9 +721,7 @@ def _wrist_from_frame(frame_bgr: np.ndarray, gray_depth: np.ndarray, cpm: ViTPos
     wrist_v = y0 + hand_kpts[0, 1]
     return float(wrist_u), float(wrist_v)
 
-# ---------------------------------------------------------------------------
 # Hand Position Registration With ICP and Frame 0 Alignment Helper
-# ---------------------------------------------------------------------------
 def register_hand_positions(pcd_root, hand3d_root, save_reg_root, threshold=0.03):
     """
     Align per-frame 3-D hand positions to the first frame using point-to-point
@@ -775,68 +739,60 @@ def register_hand_positions(pcd_root, hand3d_root, save_reg_root, threshold=0.03
     Returns:
         None
     """
-    os.makedirs(save_reg_root, exist_ok=True)                              # ensure output dir exists
-    for video in sorted(os.listdir(pcd_root)):                             # iterate each video folder
-        pcd_dir = os.path.join(pcd_root, video)                            # path to this video’s PLYs
-        hand3d_path = os.path.join(hand3d_root, f"{video}.json")           # path to camera-frame hand JSON
-        if not os.path.isdir(pcd_dir) or not os.path.isfile(hand3d_path):  # skip if either missing
+    os.makedirs(save_reg_root, exist_ok=True)
+    for video in sorted(os.listdir(pcd_root)):
+        pcd_dir = os.path.join(pcd_root, video)
+        hand3d_path = os.path.join(hand3d_root, f"{video}.json")
+        if not os.path.isdir(pcd_dir) or not os.path.isfile(hand3d_path):
             continue
-        hand3d = json.load(open(hand3d_path))                              # load camera-frame keypoints
+        hand3d = json.load(open(hand3d_path))
         plys = sorted([f for f in os.listdir(pcd_dir) if f.endswith('.ply')],
-                      key=lambda x: int(os.path.splitext(x)[0]))           # list PLYs in order
+                      key=lambda x: int(os.path.splitext(x)[0]))
 
-        first_pcd = None                                                   # reference cloud (frame 1)
-        odoms = []                                                         # unused – kept from orig code
-        reg_hand_dict = {}                                                 # output dict: frameID → (x,y,z)
-        prev_pcd = None                                                    # helps store first_pcd
+        first_pcd = None  # reference cloud (frame 1)
+        odoms = []  # unused - kept from orig code
+        reg_hand_dict = {}  # output dict: frameID to (x,y,z)
+        prev_pcd = None  # helps store first_pcd
 
-        for i, ply in enumerate(plys):                                     # walk over every cloud
-            frame_id = str(i + 1)                                          # JSON is 1-based indexing
-            pcd = o3d.io.read_point_cloud(os.path.join(pcd_dir, ply))      # load current cloud
-            pts = np.asarray(pcd.points)                                   # numpy view of XYZ
-            pcd.points = o3d.utility.Vector3dVector(pts)                   # write back to Open3D cloud
+        for i, ply in enumerate(plys):
+            frame_id = str(i + 1)  # JSON is 1-based indexing
+            pcd = o3d.io.read_point_cloud(os.path.join(pcd_dir, ply))
+            pts = np.asarray(pcd.points)
+            pcd.points = o3d.utility.Vector3dVector(pts)
 
-            if i == 0:                                                     # first frame: no registration
-                odoms.append(np.eye(4))                                    # placeholder (unused)
-                if frame_id in hand3d:                                     # store original hand if exists
-                    h0 = np.array(hand3d[frame_id])                        # camera-frame wrist point
-                    reg_hand_dict[frame_id] = h0.tolist()                  # frame 1 becomes origin
+            if i == 0:  # first frame: no registration
+                odoms.append(np.eye(4))  # placeholder (unused)
+                if frame_id in hand3d:
+                    h0 = np.array(hand3d[frame_id])  # camera-frame wrist point
+                    reg_hand_dict[frame_id] = h0.tolist()  # frame 1 becomes origin
             else:
-                if first_pcd is None:                                      # cache reference once
+                if first_pcd is None:  # cache reference once
                     first_pcd = prev_pcd
 
-                reg = o3d.pipelines.registration.registration_icp(         # ICP: current → first
-                    pcd,                                                   # source cloud
-                    first_pcd,                                             # target cloud
-                    threshold,                                             # correspondence distance (m)
-                    np.eye(4),                                             # initial guess = identity
-                    o3d.pipelines.registration.
-                        TransformationEstimationPointToPoint()
+                reg = o3d.pipelines.registration.registration_icp(
+                    pcd,  # source cloud
+                    first_pcd,  # target cloud
+                    threshold,  # correspondence distance (m)
+                    np.eye(4),  # initial guess = identity
+                    o3d.pipelines.registration.TransformationEstimationPointToPoint()
                 )
-                T = reg.transformation                                     # 4×4 rigid transform
+                T = reg.transformation  # 4x4 rigid transform
 
-                h = np.array(hand3d.get(str(i + 1), [np.nan, np.nan, np.nan]))  # wrist in camera frame
-                h4 = np.append(h, 1)                                       # homogeneous coordinate
-                h_reg = (T @ h4)[:3].tolist()                              # apply ICP transform
-                if frame_id in hand3d:                                     # store if key exists
+                h = np.array(hand3d.get(str(i + 1), [np.nan, np.nan, np.nan]))
+                h4 = np.append(h, 1)  # homogeneous coordinate
+                h_reg = (T @ h4)[:3].tolist()  # apply ICP transform
+                if frame_id in hand3d:
                     reg_hand_dict[frame_id] = h_reg
 
-            prev_pcd = pcd                                                 # keep for first_pcd assignment
+            prev_pcd = pcd  # keep for first_pcd assignment
 
         # save globally registered trajectory for this video
         with open(os.path.join(save_reg_root, f"{video}.json"), 'w') as f:
             json.dump(reg_hand_dict, f, indent=4)
         print(f"Computed globally registered 3-D hand trajectory for {video}")
 
-# ---------------------------------------------------------------------------
 # Robust percentile-flavoured detector
-# ---------------------------------------------------------------------------
-def contact_separation_from_speed(
-    speed_dict: Dict[int, float],
-    *,
-    active_pct: float = 30.0,     # % of frames considered “active”
-    sigma: int = 5
-) -> Tuple[int, int]:
+def contact_separation_from_speed(speed_dict: Dict[int, float], *, active_pct: float = 30.0, sigma: int = 5) -> Tuple[int, int]:
     """
     Return first contact & last separation indices in a *very flat* speed curve.
 
@@ -861,9 +817,7 @@ def contact_separation_from_speed(
     separation = int(len(active) - np.argmax(active[::-1]))
     return contact, separation
 
-# ---------------------------------------------------------------------------
 # VLM Refinement
-# ---------------------------------------------------------------------------
 def refine_with_vlm(current_idx: int, creds: Dict[str, Any], video_path: str, prompt: str) -> int:
     """Ask GPT‑4(o) to confirm or shift the key frame.  Fall back to current_idx."""
     cap = cv2.VideoCapture(video_path)
@@ -876,9 +830,7 @@ def refine_with_vlm(current_idx: int, creds: Dict[str, Any], video_path: str, pr
     new_idx = scene_understanding(creds, frame, prompt)
     return current_idx if new_idx in (-1, None) else int(new_idx)
 
-# ---------------------------------------------------------------------------
 # 3‑D hand‑speed extraction + visualisation
-# ---------------------------------------------------------------------------
 def extract_3d_speed_and_visualize(video_path: str, output_dir: str, *, device: str = "cuda", encoder: str = "vits"):
     cpm = _get_vitpose_model(device)
 
@@ -918,7 +870,6 @@ def extract_3d_speed_and_visualize(video_path: str, output_dir: str, *, device: 
     else:
         raise RuntimeError("Depth repair failed after two attempts – aborting.")
 
-    # ── NEW: build coloured point clouds ─────────────────────────────────
     pcd_dir = output_dir / "pointclouds" / video_name
     if not (pcd_dir / "0.ply").exists():
         print("[PCD] Building point clouds …")
@@ -926,12 +877,10 @@ def extract_3d_speed_and_visualize(video_path: str, output_dir: str, *, device: 
     else:
         print("[PCD] Reusing cached point clouds in", pcd_dir)
 
-    # ── NEW: global wrist registration ──────────────────────────────────
     cam_hand_dir = output_dir / "hand3d_cam"
     cam_hand_dir.mkdir(exist_ok=True)
     cam_hand_json = cam_hand_dir / f"{video_name}.json"
 
-    # --- write raw camera-frame wrist coords while scanning frames -------
     cap_rgb = cv2.VideoCapture(video_path)
     if not cap_rgb.isOpened():
         raise RuntimeError("Could not open RGB video.")
@@ -993,7 +942,6 @@ def extract_3d_speed_and_visualize(video_path: str, output_dir: str, *, device: 
     with open(reg_out_dir / f"{video_name}.json") as f:
         reg_hand = json.load(f)
 
-# ── compute world-frame speed ────────────────────────────────────────
     speed_dict = {}
     prev_xyz = None
     for idx in range(total_frames):
@@ -1015,7 +963,6 @@ def extract_3d_speed_and_visualize(video_path: str, output_dir: str, *, device: 
             speed = float(np.linalg.norm([dx,dy,dz]))    # true world speed
         prev_xyz = xyz
         speed_dict[idx] = speed
-# --------------------------------------------------------------------
 
     speed_json_path = output_dir / f"{video_name}_speed.json"
     with open(speed_json_path, "w") as f:
@@ -1032,9 +979,7 @@ def extract_3d_speed_and_visualize(video_path: str, output_dir: str, *, device: 
 
     return speed_dict, str(speed_json_path), str(speed_vis_path), str(depth_vis_path)
 
-# ---------------------------------------------------------------------------
 # Point Cloud Generation
-# ---------------------------------------------------------------------------
 def _generate_pointclouds(depth_dir: Path,  video_path: str, pcd_out_dir: Path, intrinsics: Optional[Tuple[float,float,float,float]] = None):
     """
     Create a coloured .ply point cloud for every frame whose depth tensor exists.
@@ -1076,15 +1021,11 @@ def _generate_pointclouds(depth_dir: Path,  video_path: str, pcd_out_dir: Path, 
             depth_trunc=4.0, convert_rgb_to_intensity=False
         )
         pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd, intrinsic)
-        # flip to keep +Z forward, +Y up (matches your earlier flip in register func)
-#       pcd.transform([[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]]) # < --------------------------
         o3d.io.write_point_cloud(str(pcd_out_dir / f"{idx}.ply"), pcd, write_ascii=False)
     cap.release()
     print(f"[PCD] Generated {len(depth_files)} point clouds in {pcd_out_dir}")
 
-# ---------------------------------------------------------------------------
 # Video Convert
-# ---------------------------------------------------------------------------
 def convert_video(video_path: str, action: str, credentials: Dict[str, Any], grid_size: int, speed_folder: str, max_feedbacks: int = MAX_FEEDBACKS, repeat_times: int = 3):
     """Driver wrapper (identical logic to 2-D)."""
     cap = cv2.VideoCapture(video_path)
@@ -1142,9 +1083,7 @@ def convert_video(video_path: str, action: str, credentials: Dict[str, Any], gri
     final_separate = -1 if not separate_list else int(round(np.mean(separate_list)))
     return final_contact, final_separate
 
-# ---------------------------------------------------------------------------
 # Tiny visual helper
-# ---------------------------------------------------------------------------
 def visualize_frame(video_path: str, idx: int, out_path: str, label: Optional[str] = None):
     if idx < 0:
         return
@@ -1161,9 +1100,7 @@ def visualize_frame(video_path: str, idx: int, out_path: str, label: Optional[st
     print(f"Visualized frame {idx} to {out_path}")
 
 
-# ---------------------------------------------------------------------------
 # CLI entry point (with feedback loop)
-# ---------------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser("EgoLoc 3-D Demo (lite edition)")
     parser.add_argument("--video_path", required=True, help="Input video")
@@ -1191,7 +1128,6 @@ def main():
     )
     args = parser.parse_args()
 
-    # ------------------- device selection -------------------
     if args.device == "auto":
         device = "cuda" if torch and torch.cuda.is_available() else "cpu"
     elif args.device == "cuda" and (not torch or not torch.cuda.is_available()):
@@ -1200,7 +1136,6 @@ def main():
     else:
         device = args.device
 
-    # ------------------- step 1: 3-D speed -------------------
     print("\n [1/3] Extracting 3-D hand speed and visualizing ...")
     speed_dict, speed_json, speed_vis, depth_vid = extract_3d_speed_and_visualize(
         args.video_path,
@@ -1209,7 +1144,6 @@ def main():
         encoder=args.encoder,
     )
 
-    # ------------- step 2: temporal localisation -------------
     print("\n [2/3] Locating contact/separation frames and visualizing ...")
     credentials = dotenv.dotenv_values(args.credentials)
 
@@ -1224,14 +1158,12 @@ def main():
     )
     print(f"Resolved ➜ contact: {contact_idx}, separation: {separation_idx}")
 
-    # ------------- visualise keyframes -----------------------
     video_name = Path(args.video_path).stem
     contact_vis = Path(args.output_dir) / f"{video_name}_contact_frame.png"
     separation_vis = Path(args.output_dir) / f"{video_name}_separation_frame.png"
     visualize_frame(args.video_path, contact_idx, str(contact_vis), "Contact")
     visualize_frame(args.video_path, separation_idx, str(separation_vis), "Separation")
 
-    # ---------------- step 3: save results -------------------
     print("\n [3/3] Saving results ...")
     result = {
         "contact_frame": contact_idx,
@@ -1241,7 +1173,6 @@ def main():
     with open(result_path, "w") as f:
         json.dump(result, f, indent=2)
 
-    # ------------------- final console log -------------------
     print("EgoLoc output\n", result)
     print(f"Result json      : {result_path}")
     print(f"3-D speed json   : {speed_json}")

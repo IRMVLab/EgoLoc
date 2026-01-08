@@ -492,17 +492,7 @@ def select_top_n_frames_from_json(json_path, n, frame_index=None, flag=None, rec
     else:
         return invalid_list, top_n_frames
 
-def process_task(
-        credentials,
-        video_path,
-        action,
-        grid_size,
-        total_frames,
-        search_anchor,
-        speed_folder,
-        frame_index=None,
-        flag=None
-        ):
+def process_task(credentials, video_path, action, grid_size, total_frames, search_anchor, speed_folder, frame_index=None, flag=None):
     """
     Build a grid image, ask GPT-4V to pick the frame where the action starts
     or ends, and return the chosen frame index.
