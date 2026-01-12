@@ -14,7 +14,7 @@
 
 📄 [Extended journal version](https://arxiv.org/abs/2508.12349) for more details.
 
-We have released the extended version of EgoLoc for long untrimmed videos. Feel free to use it!
+📣 We have released the extended version of EgoLoc for long untrimmed videos. Feel free to use it!
 
 
 <div align="center">
@@ -245,19 +245,18 @@ For file paths related to GroundedSAM, please refer to its [original repository]
 We have released a new version of EgoLoc that can handle long videos (without additional dependences). Please use the following command to run it:
 
 ```bash
-python egoloc3d_raw.py  --video_path ManiTIL/cabinet/video/video1.mp4  --speed_json ManiTIL/cabinet/speed/video1_speed.json  --video_type long
+python egoloc3d_long.py  --video_path ManiTIL/cabinet/video/video1.mp4  --speed_json ManiTIL/cabinet/speed/video1_speed.json  --video_type long
 ```
 
-Note that our method still works even no true depth observations are available. Relative 3D hand speed can be extracted by VDA. You can run the VDA-based version for long videos via the following command:
+We have provided the hand speed precomputed by raw depth for quick use. Note that our method still works even no true depth observations are available. Relative 3D hand speed can be extracted by [VDA](https://github.com/DepthAnything/Video-Depth-Anything.git). You can run the VDA-based version for long videos via the following command:
 
 ```bash
-python egoloc3d_vda.py  --video_path ManiTIL/cabinet/video/video1.mp4  --video_type long
+python egoloc3d_long.py  --video_path ManiTIL/cabinet/video/video1.mp4  --video_type long
 ```
 
 * The example long videos in our ManiTIL benchmark are available [here](https://pan.sjtu.edu.cn/web/share/6ba9a6b6d8f9161c75d5029f5d997726). Please download and unzip to the `./ManiTIL/` directory.
 
-* This is the initial release of extended EgoLoc for long videos. We are still in the process of cleaning, refactoring, and
-documenting the updated codebase and benchmarks. We plan to complete all updates in the following several months. **We appreciate your interest and patience. But for now, feel free to use EgoLoc in your own projects!**
+* This is the initial release of extended EgoLoc for long videos. We are still in the process of cleaning, refactoring, and documenting the updated codebase and benchmarks. We plan to complete all updates in the following several months. **We appreciate your interest and patience. But for now, feel free to use EgoLoc in your own projects!**
 
 ---
 
