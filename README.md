@@ -30,7 +30,7 @@ We greatly appreciate [Yuchen Xie](https://github.com/yuchenxie4645) for helping
 
 ## 1. Getting Started
 
-> We provide two demo videos from the [EgoPAT3D-DT dataset](https://github.com/oppo-us-research/USST) for quick experimentation.
+> We provide videos from the [EgoPAT3D-DT dataset](https://github.com/oppo-us-research/USST) and our self-recorded data for quick experimentation.
 
 ---
 
@@ -138,10 +138,10 @@ git clone https://github.com/DepthAnything/Video-Depth-Anything.git
 
 # 2) python packages
 # Install HaMeR dependencies
-# Install VDA dependencies
+# Install Video-Depth-Anything dependencies
 pip install opencv-python open3d matplotlib scipy tqdm
 
-# 3) Get Video-Depth-Anything checkpoint
+# 3) Get Video-Depth-Anything checkpoints
 ```
 
 </details>
