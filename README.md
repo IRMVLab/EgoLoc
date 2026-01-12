@@ -135,7 +135,7 @@ git clone https://github.com/geopavlakos/hamer.git
 git clone https://github.com/DepthAnything/Video-Depth-Anything.git
 
 # 2) python packages
-# Install HaMeR dependencies (Note: MANO model is NOT required for this installation)
+# Install HaMeR dependencies
 # Install VDA dependencies
 pip install opencv-python open3d matplotlib scipy tqdm
 
