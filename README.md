@@ -1,4 +1,4 @@
-# EgoLoc: Zero-Shot Temporal Interaction Localization for Egocentric Videos
+# EgoLoc: Temporal Interaction Localization in Egocentric Videos
 
 **Authors**: [Erhang Zhang#](https://scholar.google.com/citations?user=j1mUqHEAAAAJ&hl=en), [Junyi Ma#](https://github.com/BIT-MJY), [Yin-Dong Zheng](https://dblp.org/pid/249/8371.html), [Yixuan Zhou](https://ieeexplore.ieee.org/author/37089460430), [Hesheng Wang\*](https://scholar.google.com/citations?user=q6AY9XsAAAAJ&hl)
 
@@ -11,6 +11,9 @@
 **EgoLoc** is a vision-language model (VLM)-based framework that localizes **hand-object contact and separation timestamps** in egocentric videos in a **zero-shot** manner. Our approach extends the traditional scope of *temporal action localization (TAL)* to a finer level, which we define as *temporal interaction localization (TIL)*.
 
 📄 [Read our paper](https://arxiv.org/abs/2506.03662) – accepted at **IROS 2025**.
+
+📄 [Extended journal version](https://arxiv.org/abs/2508.12349) for more details.
+
 
 <div align="center">
  <h3>
@@ -134,7 +137,7 @@ git clone https://github.com/DepthAnything/Video-Depth-Anything.git
 # 2) python packages
 # Install HaMeR dependencies (Note: MANO model is NOT required for this installation)
 # Install VDA dependencies
-pip install opencv-python matplotlib scipy tqdm
+pip install opencv-python open3d matplotlib scipy tqdm
 
 # 3) Get Video-Depth-Anything checkpoint
 ```
@@ -250,10 +253,18 @@ But for now, feel free to explore the demos — and try it out on your own video
 🙏 If you find EgoLoc useful in your research, please consider citing:
 
 ```bibtex
-@article{zhang2025zero,
-  title={Zero-Shot Temporal Interaction Localization for Egocentric Videos},
-  author={Zhang, Erhang and Ma, Junyi and Zheng, Yin-Dong and Zhou, Yixuan and Wang, Hesheng},
-  journal={arXiv preprint arXiv:2506.03662},
+@INPROCEEDINGS{zhang2025zero,
+  author={Zhang, Erhang and Ma, Junyi and Zheng, Yin-Dong and Zhou, Yixuan and Xu, Fan},
+  booktitle={2025 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)}, 
+  title={Zero-Shot Temporal Interaction Localization for Egocentric Videos}, 
+  year={2025},
+  pages={19554-19561}
+}
+
+@article{ma2025egoloc,
+  title={EgoLoc: A Generalizable Solution for Temporal Interaction Localization in Egocentric Videos},
+  author={Ma, Junyi and Zhang, Erhang and Zheng, Yin-Dong and Xie, Yuchen and Zhou, Yixuan and Wang, Hesheng},
+  journal={arXiv preprint arXiv:2508.12349},
   year={2025}
 }
 ```
@@ -262,7 +273,7 @@ But for now, feel free to explore the demos — and try it out on your own video
 
 ## 5. Our Future Roadmap
 
-* [x] Add support for **3D hand motion analysis** *(within 2 weeks)*
+* [x] Add support for **3D hand motion analysis** 
 * [ ] Extend to **long untrimmed videos** 
 * [ ] Improve efficiency of the **feedback loop mechanism** 
 
