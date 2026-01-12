@@ -14,6 +14,8 @@
 
 📄 [Extended journal version](https://arxiv.org/abs/2508.12349) for more details.
 
+We have released the extended version of EgoLoc for long untrimmed videos. Feel free to use it!
+
 
 <div align="center">
  <h3>
@@ -158,7 +160,7 @@ from .segment_anything import SamPredictor, sam_model_registry
 If you encounter a bug, please do not hesitate to make a PR.
 
 ---
-## 2. Running EgoLoc
+## 2. Running EgoLoc for Short Video Clips
 
 > We provide both 2D and 3D demos for you to test out. 
 
@@ -223,7 +225,7 @@ The temporal interaction localization results will be saved in the `output` dire
 
 ---
 
-### 3. Configuration Parameters
+### 2.3. Configuration Parameters
 
 Here are some key arguments you can adjust when running EgoLoc.
 For file paths related to GroundedSAM, please refer to its [original repository](https://github.com/IDEA-Research/Grounded-Segment-Anything).
@@ -238,13 +240,24 @@ For file paths related to GroundedSAM, please refer to its [original repository]
 
 ---
 
-We plan to release a full version of EgoLoc and additional benchmarks soon.
-In the future, we will also show:
+## 3. Running EgoLoc for Long Videos
 
-* How to integrate EgoLoc with state-of-the-art hand motion forecasting frameworks like [MMTwin](https://github.com/IRMVLab/MMTwin)
-* How to deploy EgoLoc in robotic manipulation tasks
+We have released a new version of EgoLoc that can handle long videos (without additional dependences). Please use the following command to run it:
 
-But for now, feel free to explore the demos — and try it out on your own videos!
+```bash
+python egoloc3d_raw.py  --video_path ManiTIL/cabinet/video/video1.mp4  --speed_json ManiTIL/cabinet/speed/video1_speed.json  --video_type long
+```
+
+Note that our method still works even no true depth observations are available. Relative 3D hand speed can be extracted by VDA. You can run the VDA-based version for long videos via the following command:
+
+```bash
+python egoloc3d_vda.py  --video_path ManiTIL/cabinet/video/video1.mp4  --video_type long
+```
+
+* The example long videos in our ManiTIL benchmark are available [here](https://pan.sjtu.edu.cn/web/share/6ba9a6b6d8f9161c75d5029f5d997726). Please download and unzip to the `./ManiTIL/` directory.
+
+* This is the initial release of extended EgoLoc for long videos. We are still in the process of cleaning, refactoring, and
+documenting the updated codebase and benchmarks. We plan to complete all updates in the following several months. **We appreciate your interest and patience. But for now, feel free to use EgoLoc in your own projects!**
 
 ---
 
@@ -271,15 +284,6 @@ But for now, feel free to explore the demos — and try it out on your own video
 
 ---
 
-## 5. Our Future Roadmap
-
-* [x] Add support for **3D hand motion analysis** 
-* [ ] Extend to **long untrimmed videos** 
-* [ ] Improve efficiency of the **feedback loop mechanism** 
-
----
-
-**We appreciate your interest and patience!**
 
 ## 6. License
 
