@@ -143,6 +143,7 @@ pip install opencv-python open3d matplotlib scipy tqdm
 
 # 3) Get Video-Depth-Anything checkpoints
 ```
+</details>
 
 ---
 
