@@ -144,9 +144,6 @@ pip install opencv-python open3d matplotlib scipy tqdm
 # 3) Get Video-Depth-Anything checkpoints
 ```
 
-</details>
-> Note: the VDA-based 3D demo is still under developmental phase, if any bugs are spotted please do not hesitate to make a PR. 
-
 ---
 
 ### 1.3 Known Bugs (With the assumption of successfull installation of all dependecies)
@@ -256,7 +253,7 @@ python egoloc3d_long.py  --video_path ManiTIL/cabinet/video/video1.mp4  --video_
 
 * The example long videos in our ManiTIL benchmark are available [here](https://pan.sjtu.edu.cn/web/share/6ba9a6b6d8f9161c75d5029f5d997726). Please download and unzip to the `./ManiTIL/` directory.
 
-* This is the initial release of extended EgoLoc for long videos. We are still in the process of cleaning, refactoring, and documenting the updated codebase and benchmarks. We plan to complete all updates in the following several months. **We appreciate your interest and patience. But for now, feel free to use EgoLoc in your own projects!**
+* This is the initial release of extended EgoLoc for long videos. We are still in the process of cleaning, refactoring, and documenting the updated codebase and benchmarks. We plan to complete all updates in the following several months. **We appreciate your interest and patience. For now, feel free to use EgoLoc in your own projects!**
 
 ---
 
