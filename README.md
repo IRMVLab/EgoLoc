@@ -24,7 +24,7 @@
  <img src="TAL_TIL.png" alt="TAL to TIL Diagram" width="70%" />
 </div>
 
-We greatly appreciate [Yuchen Xie](https://github.com/yuchenxie4645) for helping organize our repository and developing [VDA-based & bimanual extension (https://pan.sjtu.edu.cn/web/share/d8e2b69ef5ae66fe00c686783ae011b8).
+We greatly appreciate [Yuchen Xie](https://github.com/yuchenxie4645) for organizing our repository and helping develop [VDA-based & bimanual extension] (https://pan.sjtu.edu.cn/web/share/d8e2b69ef5ae66fe00c686783ae011b8).
 
 ---
 
