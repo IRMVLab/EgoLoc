@@ -282,7 +282,7 @@ python egoloc3d_long.py  --video_path ManiTIL/cabinet/video/video1.mp4  --video_
 ---
 
 
-## 6. License
+## 5. License
 
 Copyright 2025, IRMV Lab, SJTU.
 
